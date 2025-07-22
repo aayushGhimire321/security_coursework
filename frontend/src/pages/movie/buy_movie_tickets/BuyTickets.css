@@ -1,0 +1,206 @@
+
+.movie-card {
+
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+
+  transition: 0.3s;
+
+}
+ 
+.movie-card:hover {
+
+  box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+
+}
+ 
+.show-card {
+
+  cursor: pointer;
+
+  transition: 0.3s;
+
+}
+ 
+.show-card:hover, .show-card.selected {
+
+  background-color: #e9ecef;
+
+}
+ 
+.seat-grid {
+
+  display: grid;
+
+  grid-template-columns: repeat(10, 1fr);
+
+  gap: 10px;
+
+}
+ 
+.seat-button {
+
+  background-color: #28a745;
+
+  border: none;
+
+  color: white;
+
+  padding: 10px;
+
+  text-align: center;
+
+  text-decoration: none;
+
+  display: inline-block;
+
+  font-size: 16px;
+
+  margin: 4px 2px;
+
+  cursor: pointer;
+
+  border-radius: 5px;
+
+}
+ 
+.seat-button.selected {
+
+  background-color: #ffc107;
+
+}
+ 
+.seat-button.unavailable {
+
+  background-color: #dc3545;
+
+  cursor: not-allowed;
+
+}
+ 
+.screen {
+
+  background-color: #f8f9fa;
+
+  text-align: center;
+
+  padding: 20px;
+
+  border-radius: 5px;
+
+}
+ 
+.seat-legend {
+
+  display: flex;
+
+  justify-content: space-around;
+
+}
+ 
+.seat-type {
+
+  display: flex;
+
+  align-items: center;
+
+}
+ 
+.seat-type::before {
+
+  content: '';
+
+  display: inline-block;
+
+  width: 20px;
+
+  height: 20px;
+
+  margin-right: 5px;
+
+  border-radius: 5px;
+
+}
+ 
+.seat-type.available::before {
+
+  background-color: #28a745;
+
+}
+ 
+.seat-type.selected::before {
+
+  background-color: #ffc107;
+
+}
+ 
+.seat-type.unavailable::before {
+
+  background-color: #dc3545;
+
+}
+
+.ticket {
+  border: 2px solid #000;
+  border-radius: 10px;
+  padding: 20px;
+  max-width: 400px;
+  margin: 0 auto;
+  background-color: #fff;
+}
+
+.ticket-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.ticket-body {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ticket-info {
+  flex: 1;
+}
+
+.ticket-logo {
+  flex: 1;
+  text-align: center;
+}
+
+.ticket-logo img {
+  max-width: 100px;
+  height: auto;
+}
+
+.screen {
+  background-color: #fff;
+  height: 70px;
+  width: 100%;
+  margin: 15px 0;
+  transform: rotateX(-45deg);
+  box-shadow: 0 3px 10px rgba(255, 255, 255, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-transform: uppercase;
+  font-weight: bold;
+  color: #555;
+}
+
+.screen::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  background: linear-gradient(to bottom, #fff, #ccc);
+  border-radius: 50%/100% 100% 0 0;
+  transform: scaleY(0.3);
+  z-index: -1;
+}
+
+
+
+ 
