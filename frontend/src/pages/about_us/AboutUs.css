@@ -1,0 +1,138 @@
+.about-us-container {
+    padding-top: 25%;
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 20px;
+    font-family: Arial, sans-serif;
+    color: #333;
+  }
+  
+  .about-us-header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+  
+  .about-us-header h1 {
+    font-size: 3rem;
+    color: #1a1a1a;
+    margin-bottom: 0.5rem;
+  }
+  
+  .about-us-header p {
+    font-size: 1.2rem;
+    color: #666;
+  }
+  
+  .about-us-content {
+    display: grid;
+    gap: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+  
+  .about-us-intro,
+  .about-us-mission,
+  .about-us-features {
+    background-color: #f9f9f9;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .about-us-content h2 {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+    color: #1a1a1a;
+  }
+  
+  .about-us-content p,
+  .about-us-content ul {
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+  
+  .about-us-features ul {
+    padding-left: 1.5rem;
+  }
+  
+  .about-us-team {
+    margin-top: 3rem;
+    text-align: center;
+  }
+  
+  .team-members {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 2rem;
+    margin-top: 2rem;
+  }
+  
+  .team-member {
+    flex-basis: calc(33.333% - 2rem);
+    min-width: 200px;
+  }
+  
+  .team-member img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 1rem;
+  }
+  
+  .team-member h3 {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .team-member p {
+    font-size: 1rem;
+    color: #666;
+  }
+  
+  .about-us-cta {
+    text-align: center;
+    margin-top: 4rem;
+    padding: 3rem;
+    background-color: #f0f0f0;
+    border-radius: 8px;
+  }
+  
+  .about-us-cta h2 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+  }
+  
+  .about-us-cta p {
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+  }
+  
+  .cta-button {
+    padding: 12px 24px;
+    font-size: 1.1rem;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .cta-button:hover {
+    background-color: #0056b3;
+  }
+  
+  @media (max-width: 768px) {
+    .about-us-header h1 {
+      font-size: 2.5rem;
+    }
+  
+    .about-us-content {
+      grid-template-columns: 1fr;
+    }
+  
+    .team-member {
+      flex-basis: 100%;
+    }
+  }
