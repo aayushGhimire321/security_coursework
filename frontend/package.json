@@ -1,0 +1,79 @@
+
+{
+  "name": "film_sathi",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@fortawesome/fontawesome-svg-core": "^6.5.2",
+    "@fortawesome/free-solid-svg-icons": "^6.5.2",
+    "@fortawesome/react-fontawesome": "^0.2.2",
+    "@mui/icons-material": "^6.4.0",
+    "@mui/lab": "^6.0.0-beta.24",
+    "@mui/material": "^6.4.0",
+    "@react-oauth/google": "^0.12.1",
+    "@testing-library/user-event": "^13.5.0",
+    "adb": "^0.2.0",
+    "axios": "^1.7.9",
+    "axios-mock-adapter": "^2.0.0",
+    "cine_ease": "file:",
+    "date-fns": "^3.6.0",
+    "dompurify": "^3.2.3",
+    "https": "^1.0.0",
+    "jwt-decode": "^4.0.0",
+    "khalti-checkout-web": "^2.2.0",
+    "lucide-react": "^0.414.0",
+    "qrcode.react": "^3.1.0",
+    "react": "^18.3.1",
+    "react-chartjs-2": "^5.2.0",
+    "react-dom": "^18.3.1",
+    "react-google-recaptcha": "^3.1.0",
+    "react-icons": "^5.2.1",
+    "react-modal": "^3.16.1",
+    "react-qr-code": "^2.0.15",
+    "react-router-dom": "^6.23.1",
+    "react-scripts": "5.0.1",
+    "react-spinners": "^0.14.1",
+    "react-toastify": "^10.0.5",
+    "recharts": "^2.12.7",
+    "styled-components": "^6.1.11",
+    "toastify": "^2.0.1",
+    "web-vitals": "^2.1.4",
+    "zxcvbn": "^4.4.2"
+  },
+  "scripts": {
+    "start": "cross-env HTTPS=true SSL_CRT_FILE=./certificate/root.crt SSL_KEY_FILE=./certificate/root.key react-scripts start",
+    "build": "set \"GENERATE_SOURCEMAP=false\" && react-scripts build",
+    "deploy": "serve -s build --listen 3000 --ssl-cert ./certificate/root.crt --ssl-key ./certificate/root.key",
+    "test": "react-scripts test --transformIgnorePatterns \"node_modules/(?!axios)/\"",
+    "eject": "react-scripts eject",
+    "snyk-test": "snyk test",
+    "snyk-monitor": "snyk monitor",
+    "snyk-fix": "snyk fix"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.4.8",
+    "@testing-library/react": "^16.0.0",
+    "cross-env": "^7.0.3",
+    "jest": "^27.5.1"
+  }
+}
