@@ -1,7 +1,24 @@
 const Booking = require('../models/bookingModel');
+const Log = require('../models/logModel');
 
 const path = require('path');
 const crypto = require('crypto-js');
+
+// Helper function to log booking activities
+const logBookingActivity = async (level, message, method, url, userId, ip) => {
+  try {
+    await Log.create({
+      level,
+      message,
+      method,
+      url,
+      user: userId || 'unknown',
+      ip: ip || 'unknown'
+    });
+  } catch (error) {
+    console.error('Failed to log booking activity:', error.message);
+  }
+};
 
 const encrypt = (text) => {
   return crypto.AES.encrypt(text, process.env.ENCRYPTION_KEY).toString();

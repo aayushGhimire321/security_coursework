@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const sendOtp = require('../service/sendotp');
 const User = require('../models/userModel');
 const zxcvbn = require('zxcvbn');
+const Log = require('../models/logModel');
 const {
   sendLoginVerificationEmail,
   sendRegisterOtp,
@@ -12,6 +13,22 @@ const {
 const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
+
+// Helper function to log user activities
+const logUserActivity = async (level, message, method, url, email, ip) => {
+  try {
+    await Log.create({
+      level,
+      message,
+      method,
+      url,
+      user: email || 'anonymous',
+      ip: ip || 'unknown'
+    });
+  } catch (error) {
+    console.error('Failed to log user activity:', error.message);
+  }
+};
 
 const crypto = require('crypto-js');
 
@@ -127,6 +144,16 @@ const createUser = async (req, res) => {
     // Save to database
     await newUser.save();
 
+    // Log successful user registration
+    await logUserActivity(
+      'info',
+      'New user registration completed',
+      'POST',
+      '/api/user/register',
+      email,
+      req.ip || req.connection.remoteAddress
+    );
+
     // send the response
     res.status(201).json({
       success: true,
@@ -134,6 +161,17 @@ const createUser = async (req, res) => {
     });
   } catch (error) {
     console.error('Error in createUser:', error);
+    
+    // Log registration error (don't await in catch to avoid additional errors)
+    logUserActivity(
+      'error',
+      `User registration failed: ${error.message}`,
+      'POST',
+      '/api/user/register',
+      req.body.email || 'unknown',
+      req.ip || req.connection.remoteAddress
+    ).catch(logErr => console.error('Failed to log error:', logErr));
+
     res.status(500).json({
       success: false,
       message: 'Internal Server Error!',
@@ -167,6 +205,16 @@ const loginUser = async (req, res) => {
     const captchaSuccess = await validateCaptcha(captchaToken);
 
     if (!captchaSuccess.success) {
+      // Log CAPTCHA validation failure
+      await logUserActivity(
+        'warn',
+        `CAPTCHA validation failed for login attempt: ${captchaSuccess.message}`,
+        'POST',
+        '/api/user/login',
+        email,
+        req.ip || req.connection.remoteAddress
+      );
+
       return res.status(400).json({
         success: false,
         message: captchaSuccess.message,
@@ -196,6 +244,17 @@ const loginUser = async (req, res) => {
     if (!isValidPassword) {
       await user.incrementLoginAttempts();
       const attemptsRemaining = 5 - user.loginAttempts;
+      
+      // Log failed login attempt
+      await logUserActivity(
+        'warn',
+        `Failed login attempt for user: ${email}. Attempts remaining: ${attemptsRemaining}`,
+        'POST',
+        '/api/user/login',
+        email,
+        req.ip || req.connection.remoteAddress
+      );
+
       const lockMessage = user.isLocked
         ? `Your account is locked until ${new Date(
             user.accountLockUntil
@@ -282,7 +341,7 @@ const loginUser = async (req, res) => {
     await user.save();
 
     // Set the session
-    req.session.regenerate((err) => {
+    req.session.regenerate(async (err) => {
       if (err) {
         console.error('Failed to regenerate session:', err);
         return res
@@ -304,6 +363,16 @@ const loginUser = async (req, res) => {
 
       // console.log(token);
 
+      // Log successful login
+      await logUserActivity(
+        'success',
+        `User successfully logged in: ${email}`,
+        'POST',
+        '/api/user/login',
+        email,
+        req.ip || req.connection.remoteAddress
+      );
+
       // Send the response with both session and token
       return res.status(200).json({
         success: true,
@@ -314,6 +383,17 @@ const loginUser = async (req, res) => {
     });
   } catch (error) {
     console.error('Error logging in user:', error);
+    
+    // Log login error (don't await in catch to avoid additional errors)
+    logUserActivity(
+      'error',
+      `Login error for ${req.body.email || 'unknown'}: ${error.message}`,
+      'POST',
+      '/api/user/login',
+      req.body.email || 'unknown',
+      req.ip || req.connection.remoteAddress
+    ).catch(logErr => console.error('Failed to log error:', logErr));
+
     res.status(500).json({
       success: false,
       message: 'Internal Server Error',
@@ -362,6 +442,16 @@ const verifyRegisterOTP = async (req, res) => {
     user.verifyOTP = null;
     user.verifyExpires = null;
     await user.save();
+
+    // Log successful OTP verification and account activation
+    await logUserActivity(
+      'success',
+      `User account verified and activated: ${email}`,
+      'POST',
+      '/api/user/verify_register_otp',
+      email,
+      req.ip || req.connection.remoteAddress
+    );
 
     // Set the session
     req.session.regenerate((err) => {

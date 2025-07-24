@@ -106,9 +106,9 @@ export const completeKhaltiPaymentApi = (data) =>
 export const contactUsApi = (data) => Api.post('/api/contact/create', data);
 export const getContactMessagesApi = () => Api.get('/api/contact/get_contact');
 export const getDashboardStatsApi = () => Api.get('/api/admin/dashboard_stats');
-export const getAllLogsApi = (page, limit, searchTerm, filter) =>
+export const getAllLogsApi = (page, limit, searchTerm, levelFilter) =>
   Api.get(
-    `/api/admin/get_all_logs?page=${page}&limit=${limit}&searchTerm=${searchTerm}&filter=${filter}`
+    `/api/admin/get_all_logs?page=${page}&limit=${limit}&searchTerm=${searchTerm}&levelFilter=${levelFilter}`
   );
 
 // verify_register_otp

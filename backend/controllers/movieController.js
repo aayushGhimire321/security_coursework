@@ -1,6 +1,23 @@
 const path = require('path');
 const movieModel = require('../models/movieModel');
 const fs = require('fs');
+const Log = require('../models/logModel');
+
+// Helper function to log movie activities
+const logMovieActivity = async (level, message, method, url, userId, ip) => {
+  try {
+    await Log.create({
+      level,
+      message,
+      method,
+      url,
+      user: userId || 'system',
+      ip: ip || 'unknown'
+    });
+  } catch (error) {
+    console.error('Failed to log movie activity:', error.message);
+  }
+};
 
 const createMovie = async (req, res) => {
   // Check incoming data
@@ -57,6 +74,17 @@ const createMovie = async (req, res) => {
     });
 
     const movie = await newMovie.save();
+
+    // Log successful movie creation
+    await logMovieActivity(
+      'success',
+      `New movie created: ${movieName}`,
+      'POST',
+      '/api/movies/create',
+      req.user?.id || 'admin',
+      req.ip || req.connection.remoteAddress
+    );
+
     res.status(201).json({
       success: true,
       message: 'Movie created successfully',
@@ -64,6 +92,17 @@ const createMovie = async (req, res) => {
     });
   } catch (error) {
     // console.log(error);
+
+    // Log movie creation error
+    logMovieActivity(
+      'error',
+      `Failed to create movie: ${error.message}`,
+      'POST',
+      '/api/movies/create',
+      req.user?.id || 'admin',
+      req.ip || req.connection.remoteAddress
+    ).catch(logErr => console.error('Failed to log error:', logErr));
+
     res.status(500).json({
       'succ  ess': false,
       message: 'Internal Server Error',

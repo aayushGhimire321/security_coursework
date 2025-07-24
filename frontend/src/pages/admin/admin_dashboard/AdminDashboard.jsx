@@ -2,11 +2,13 @@ import {
   EventSeat as EventSeatIcon,
   Movie as MovieIcon,
   People as PeopleIcon,
+  Refresh as RefreshIcon,
 } from '@mui/icons-material';
 import {
   Alert,
   AlertTitle,
   Box,
+  Button,
   Card,
   CardContent,
   CircularProgress,
@@ -69,21 +71,39 @@ const AdminDashboard = () => {
     totalBookings: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const theme = useTheme();
 
+  const fetchStats = async () => {
+    try {
+      console.log('Fetching dashboard stats...');
+      setLoading(true);
+      setError(null);
+      
+      const response = await getDashboardStatsApi();
+      console.log('Dashboard response:', response);
+      
+      if (response.status === 200) {
+        console.log('Setting stats:', response.data);
+        setStats(response.data);
+      } else {
+        setError('Failed to fetch dashboard statistics');
+      }
+    } catch (error) {
+      console.error('Error fetching dashboard statistics:', error);
+      setError(error.response?.data?.message || 'Failed to load dashboard data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    getDashboardStatsApi()
-      .then((res) => {
-        if (res.status === 200) {
-          setStats(res.data);
-        }
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.error('Error fetching dashboard statistics:', error);
-        setLoading(false);
-      });
+    fetchStats();
   }, []);
+
+  const handleRefresh = () => {
+    fetchStats();
+  };
 
   const chartData = [
     { name: 'User Logins', value: stats.totalUserLogins },
@@ -105,9 +125,32 @@ const AdminDashboard = () => {
             variant='h6'
             color='textSecondary'
             sx={{ mt: 2 }}>
-            Loading...
+            Loading dashboard data...
           </Typography>
         </Box>
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box
+        display='flex'
+        justifyContent='center'
+        alignItems='center'
+        minHeight='100vh'
+        bgcolor={theme.palette.background.default}>
+        <Container maxWidth='sm'>
+          <Alert severity='error' sx={{ textAlign: 'center' }}>
+            <AlertTitle>Error Loading Dashboard</AlertTitle>
+            {error}
+            <Box sx={{ mt: 2 }}>
+              <Typography variant="body2">
+                Please check if the backend server is running and try refreshing the page.
+              </Typography>
+            </Box>
+          </Alert>
+        </Container>
       </Box>
     );
   }
@@ -137,11 +180,30 @@ const AdminDashboard = () => {
               align='center'>
               Admin Dashboard
             </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+              <Button
+                variant="outlined"
+                startIcon={<RefreshIcon />}
+                onClick={handleRefresh}
+                disabled={loading}
+                sx={{ 
+                  minWidth: 120,
+                  '&:hover': {
+                    bgcolor: 'primary.light',
+                    color: 'white',
+                  }
+                }}>
+                {loading ? 'Loading...' : 'Refresh Data'}
+              </Button>
+            </Box>
             <Alert
               severity='info'
               sx={{ mb: 4 }}>
               <AlertTitle>Welcome back!</AlertTitle>
               Here's an overview of your latest statistics.
+              <Box sx={{ mt: 1, fontSize: '0.875rem', opacity: 0.8 }}>
+                Last updated: {new Date().toLocaleString()}
+              </Box>
             </Alert>
           </Grid>
 

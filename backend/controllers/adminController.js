@@ -1,21 +1,36 @@
 const User = require('../models/userModel');
 const Movie = require('../models/movieModel');
-const Bookings = require('../models/bookingModel').default;
-const Logs = require('../models/logModel').default;
+const Bookings = require('../models/bookingModel');
+const Logs = require('../models/logModel');
 
 const getDashboardStats = async (req, res) => {
   try {
+    console.log('Fetching dashboard statistics...');
+    
     const totalUserLogins = await User.countDocuments({});
+    console.log('Total users:', totalUserLogins);
+    
     const totalMoviesAdded = await Movie.countDocuments({});
+    console.log('Total movies:', totalMoviesAdded);
+    
     const totalBookings = await Bookings.countDocuments({});
+    console.log('Total bookings:', totalBookings);
 
-    res.status(200).json({
+    const stats = {
       totalUserLogins,
       totalMoviesAdded,
       totalBookings,
-    });
+    };
+
+    console.log('Dashboard stats response:', stats);
+
+    res.status(200).json(stats);
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching dashboard statistics' });
+    console.error('Error fetching dashboard statistics:', error);
+    res.status(500).json({ 
+      message: 'Error fetching dashboard statistics',
+      error: error.message 
+    });
   }
 };
 
