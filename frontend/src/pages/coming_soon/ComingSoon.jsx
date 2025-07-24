@@ -54,7 +54,7 @@ const movieData = [
   {
     id: 3,
     title: "Captain America: Brave New World",
-    poster: "https://lh3.googleusercontent.com/proxy/RaEAQUG9nUSxi9HvDolDpljFGC0uxbd_YtXGmw8m1XNyurCd0MLew9zLT-N_d23bljQj82KdRCR6_5m3W24HMWgLXMI8OHW1Hl3mFvSr3df6h5iWK2O541wftfqFkIxeDKA",
+    poster: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQE7vzaB-s3FhliaRfVRBhZ3mxqkUCga2jxQA&s",
     genre: "Action, Adventure, Thriller",
     rating: "PG-13",
     duration: "118 min",
