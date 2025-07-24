@@ -248,8 +248,15 @@ const Login = () => {
     e.preventDefault();
     if (!validate()) return;
 
+    // Check if CAPTCHA is completed
+    if (!captchaToken) {
+      toast.error('Please complete the CAPTCHA verification');
+      return;
+    }
+
     setIsLoading(true);
     try {
+      console.log('Sending login request with CAPTCHA token:', captchaToken);
       loginUserApi({ email, password, captchaToken })
         .then((res) => {
           if (res.data.registerOtpRequired) {
@@ -263,13 +270,20 @@ const Login = () => {
           }
         })
         .catch((err) => {
-          console.log(err.response);
-          toast.error(err.response?.data?.message || 'Login failed');
+          console.log('Login error:', err.response);
+          if (err.response?.data?.message?.includes('captcha') || err.response?.data?.message?.includes('CAPTCHA')) {
+            toast.error('CAPTCHA verification failed. Please try again.');
+            // Reset CAPTCHA
+            setCaptchaToken(null);
+            // Force CAPTCHA to reset
+            window.grecaptcha?.reset();
+          } else {
+            toast.error(err.response?.data?.message || 'Login failed');
+          }
         });
     } catch (err) {
-      if (err.response) {
-        // toast.error(err.response.data.message || 'Login failed');
-      }
+      console.log('Unexpected error:', err);
+      toast.error('An unexpected error occurred');
     } finally {
       setIsLoading(false);
     }
@@ -442,10 +456,43 @@ const Login = () => {
                 />
 
                 {/* Apply recaptcha */}
-                <ReCAPTCHA
-                  sitekey='6LdK0MUqAAAAAK0fwfII18EY4NaVCxEv0CwZnKq-' // Replace with your site key
-                  onChange={(token) => setCaptchaToken(token)} // Captures the token
-                />
+                <Box sx={{ mt: 2, mb: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <ReCAPTCHA
+                    sitekey='6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI'
+                    onChange={(token) => {
+                      console.log('CAPTCHA Token received:', token ? 'Valid token' : 'No token');
+                      setCaptchaToken(token);
+                    }}
+                    onExpired={() => {
+                      console.log('CAPTCHA Expired');
+                      setCaptchaToken(null);
+                      toast.warning('CAPTCHA expired. Please complete it again.');
+                    }}
+                    onError={() => {
+                      console.log('CAPTCHA Error occurred');
+                      setCaptchaToken(null);
+                      toast.error('CAPTCHA error. Please refresh and try again.');
+                    }}
+                  />
+                  {!captchaToken && (
+                    <Typography 
+                      variant="caption" 
+                      color="text.secondary" 
+                      sx={{ mt: 1, textAlign: 'center' }}
+                    >
+                      Please complete the CAPTCHA verification above
+                    </Typography>
+                  )}
+                  {captchaToken && (
+                    <Typography 
+                      variant="caption" 
+                      color="success.main" 
+                      sx={{ mt: 1, textAlign: 'center', display: 'flex', alignItems: 'center', gap: 0.5 }}
+                    >
+                      ✓ CAPTCHA verified successfully
+                    </Typography>
+                  )}
+                </Box>
 
                 <Box
                   sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
@@ -466,7 +513,7 @@ const Login = () => {
                   type='submit'
                   fullWidth
                   variant='contained'
-                  disabled={isLoading}
+                  disabled={isLoading || !captchaToken}
                   sx={{
                     mt: 3,
                     mb: 2,
@@ -480,9 +527,13 @@ const Login = () => {
                       boxShadow: '0 6px 16px rgba(0,0,0,0.2)',
                       transform: 'translateY(-1px)',
                     },
+                    '&:disabled': {
+                      backgroundColor: theme.palette.grey[300],
+                      color: theme.palette.grey[500],
+                    },
                     transition: 'all 0.2s ease-in-out',
                   }}>
-                  {isLoading ? 'Logging in...' : 'Login'}
+                  {isLoading ? 'Logging in...' : !captchaToken ? 'Complete CAPTCHA to Login' : 'Login'}
                 </Button>
 
                 <Box

@@ -848,6 +848,16 @@ const getToken = async (req, res) => {
 
 const validateCaptcha = async (recaptchaToken) => {
   try {
+    console.log('Validating CAPTCHA token:', recaptchaToken ? 'Token received' : 'No token');
+    console.log('RECAPTCHA_SECRET_KEY exists:', !!process.env.RECAPTCHA_SECRET_KEY);
+    
+    if (!recaptchaToken) {
+      return {
+        success: false,
+        message: 'No CAPTCHA token provided',
+      };
+    }
+    
     const response = await axios.post(
       'https://www.google.com/recaptcha/api/siteverify',
       null,
@@ -856,25 +866,43 @@ const validateCaptcha = async (recaptchaToken) => {
           secret: process.env.RECAPTCHA_SECRET_KEY,
           response: recaptchaToken,
         },
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
       }
     );
+    
+    console.log('Google reCAPTCHA response:', response.data);
+    
     if (response.data.success) {
       return {
         success: true,
         message: 'Captcha Validated',
       };
     } else {
+      const errorCodes = response.data['error-codes'] || [];
+      console.log('CAPTCHA validation failed:', errorCodes);
+      
+      let errorMessage = 'Invalid Captcha';
+      if (errorCodes.includes('invalid-input-response')) {
+        errorMessage = 'Invalid CAPTCHA token. Please try again.';
+      } else if (errorCodes.includes('timeout-or-duplicate')) {
+        errorMessage = 'CAPTCHA has expired. Please complete it again.';
+      } else if (errorCodes.includes('invalid-input-secret')) {
+        errorMessage = 'CAPTCHA configuration error. Please contact support.';
+      }
+      
       return {
         success: false,
-        message: 'Invalid Captcha',
+        message: errorMessage,
       };
     }
   } catch (error) {
-    // console.log(error);
+    console.log('CAPTCHA validation error:', error.message);
     return {
       success: false,
-      message: 'Internal Server Error',
-      error: error,
+      message: 'CAPTCHA validation failed - server error',
+      error: error.message,
     };
   }
 };
