@@ -99,12 +99,13 @@ const AdminNavbar = () => {
         <Stack sx={{ p: 3, gap: 1 }}>
           <Typography
             variant='h6'
-            fontWeight='bold'>
+            fontWeight='bold'
+            sx={{ color: '#1976d2' }}>
             Admin Panel
           </Typography>
           <Typography
             variant='body2'
-            color='text.secondary'>
+            sx={{ color: '#555555' }}>
             Welcome, {admin?.username}
           </Typography>
         </Stack>
@@ -136,11 +137,19 @@ const AdminNavbar = () => {
                   color:
                     location.pathname === item.path
                       ? 'inherit'
-                      : 'text.primary',
+                      : '#333333',
                 }}>
                 {item.icon}
               </ListItemIcon>
-              <ListItemText primary={item.text} />
+              <ListItemText 
+                primary={item.text}
+                sx={{
+                  '& .MuiTypography-root': {
+                    color: location.pathname === item.path ? 'inherit' : '#333333',
+                    fontWeight: 500
+                  }
+                }}
+              />
             </ListItemButton>
           ))}
         </List>
@@ -151,10 +160,18 @@ const AdminNavbar = () => {
           <ListItemButton
             onClick={handleLogout}
             sx={{ borderRadius: 1 }}>
-            <ListItemIcon>
+            <ListItemIcon sx={{ color: '#d32f2f' }}>
               <ExitToApp />
             </ListItemIcon>
-            <ListItemText primary='Logout' />
+            <ListItemText 
+              primary='Logout'
+              sx={{
+                '& .MuiTypography-root': {
+                  color: '#d32f2f',
+                  fontWeight: 500
+                }
+              }}
+            />
           </ListItemButton>
         </List>
       </Stack>

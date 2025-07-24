@@ -113,7 +113,7 @@ const Register = () => {
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const phoneRegex = /^\+?[\d\s-]{10,}$/;
-    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/;
 
     if (!formData.username || formData.username.length < 3) {
       newErrors.username = 'Username must be at least 3 characters long';
@@ -130,18 +130,13 @@ const Register = () => {
       isValid = false;
     }
 
-    if (passwordRegex.test(formData.password)) {
-      newErrors.password = 'Password must contain at least 8 characters';
+    if (!passwordRegex.test(formData.password)) {
+      newErrors.password = 'Password must contain at least 8 characters with letters and numbers';
       isValid = false;
-    }
-
-    if (passwordStrength.score < 3) {
-      newErrors.password =
-        'Password is too weak. Please choose a stronger password.';
+    } else if (passwordStrength.score < 2) {
+      newErrors.password = 'Password is too weak. Please choose a stronger password.';
       isValid = false;
-    }
-
-    if (formData.password.includes(formData.username)) {
+    } else if (formData.password.toLowerCase().includes(formData.username.toLowerCase())) {
       newErrors.password = 'Password cannot contain username';
       isValid = false;
     }
@@ -176,10 +171,16 @@ const Register = () => {
         setIsSentOtp(true);
       }
     } catch (err) {
+      console.error('Registration error:', err);
       if (err.response) {
-        toast.warning(err.response.data.message);
+        console.error('Error response:', err.response.data);
+        toast.error(err.response.data.message || 'Registration failed');
+      } else if (err.request) {
+        console.error('Network error:', err.request);
+        toast.error('Unable to connect to server. Please check if the backend is running.');
       } else {
-        toast.error('Something went wrong');
+        console.error('Error:', err.message);
+        toast.error('Something went wrong. Please try again.');
       }
     } finally {
       setIsLoading(false);

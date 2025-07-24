@@ -37,7 +37,7 @@ const theme = createTheme({
       main: '#007bff',
     },
     secondary: {
-      main: '#6c757d',
+      main: '#ffffff',
     },
   },
 });
@@ -102,6 +102,16 @@ function App() {
             }
           />
 
+          {/* Movie Routes */}
+          <Route
+            path='/movie/buyTickets/:id'
+            element={
+              <ProtectedRoute allowedRoles={['user', 'admin']}>
+                <BuyTickets />
+              </ProtectedRoute>
+            }
+          />
+
           {/* Protected Admin Routes */}
           <Route
             path='/admin/*'
@@ -129,27 +139,38 @@ function App() {
                     element={<CustomerManagement />}
                   />
                   <Route
-                    path='bookingsManagement'
+                    path='bookingManagement'
                     element={<BookingManagement />}
                   />
                   <Route
-                    path='update/:id'
+                    path='logManagement'
+                    element={<LogManagement />}
+                  />
+                  <Route
+                    path='movies/update/:id'
                     element={<UpdateMovie />}
                   />
                   <Route
-                    path='barChart'
+                    path='analytics'
                     element={<BarChart />}
-                  />
-                  <Route
-                    path='activityLogs'
-                    element={<LogManagement />}
                   />
                 </Routes>
               </ProtectedRoute>
             }
           />
 
-          {/* Fallback Route */}
+          {/* Default Route */}
+          <Route
+            path='/'
+            element={
+              <Navigate
+                to='/homepage'
+                replace
+              />
+            }
+          />
+
+          {/* Catch-all route for 404 */}
           <Route
             path='*'
             element={

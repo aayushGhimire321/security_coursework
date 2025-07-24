@@ -98,7 +98,7 @@ const createUser = async (req, res) => {
     // 5.2 if user is new:
     const newUser = new userModel({
       username: encryptedUsername,
-      phoneNumber: encryptedUsername,
+      phoneNumber: encryptedPhoneNumber,
       email: email,
       password: hashedPassword,
       oldPasswords: passwordList,
@@ -133,10 +133,11 @@ const createUser = async (req, res) => {
       message: 'User Created Successfully!',
     });
   } catch (error) {
-    // console.log(error);
+    console.error('Error in createUser:', error);
     res.status(500).json({
       success: false,
       message: 'Internal Server Error!',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
     });
   }
 };

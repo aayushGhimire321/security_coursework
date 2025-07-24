@@ -1,5 +1,8 @@
 import {
   Alert,
+  Box,
+  Card,
+  CardContent,
   Container,
   Grid,
   Paper,
@@ -8,12 +11,16 @@ import {
   Typography,
   useMediaQuery,
   useTheme,
+  Chip,
+  Button,
 } from '@mui/material';
+import { MovieFilter, Theaters, TrendingUp } from '@mui/icons-material';
 import { debounce } from 'lodash';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { getMovieCount, getSingleProfileApi, pagination } from '../../apis/Api';
 import MovieCard from '../../components/MovieCard';
+import './Homepage.css';
 
 const carouselImages = [
   {
@@ -54,6 +61,8 @@ const Homepage = () => {
       setShowError(false);
 
       console.log('Fetching movie count...');
+      console.log('API Base URL:', process.env.REACT_APP_API_URL || 'https://localhost:5000');
+      
       const countRes = await getMovieCount();
       console.log('Movie count response:', countRes);
 
@@ -62,9 +71,20 @@ const Homepage = () => {
       }
 
       const count = countRes.data.movieCount;
+      console.log('Total movie count:', count);
       setTotalPages(Math.ceil(count / limit));
 
+      if (count === 0) {
+        console.log('No movies found in database');
+        setMovies([]);
+        setError('No movies found. Please add some movies to the database.');
+        setShowError(true);
+        return;
+      }
+
       console.log('Fetching movies with pagination...');
+      console.log('Page:', page, 'Limit:', limit);
+      
       const moviesRes = await pagination(page, limit);
       console.log('Movies response:', moviesRes);
 
@@ -80,7 +100,7 @@ const Homepage = () => {
       let errorMessage = 'An error occurred while fetching data';
       
       if (err.code === 'ECONNREFUSED' || err.code === 'ERR_NETWORK') {
-        errorMessage = 'Unable to connect to the server. Please check if the backend is running.';
+        errorMessage = 'Unable to connect to the server. Please check if the backend is running on https://localhost:5000';
       } else if (err.response?.status === 404) {
         errorMessage = 'API endpoint not found. Please check the server configuration.';
       } else if (err.response?.status === 500) {
@@ -146,32 +166,16 @@ const Homepage = () => {
     setShowError(false);
   };
 
-  const MovieSkeletons = () => (
-    <Grid
-      container
-      spacing={3}>
-      {[...Array(limit)].map((_, index) => (
-        <Grid
-          item
-          xs={12}
-          sm={6}
-          md={4}
-          key={index}>
-          <Skeleton
-            variant='rectangular'
-            height={400}
-          />
-        </Grid>
-      ))}
-    </Grid>
-  );
-
-  if (error) {
+  if (error && !loading) {
     return (
       <Container sx={{ mt: 10, mb: 4 }}>
         <Alert
           severity='error'
-          sx={{ mt: 5 }}>
+          sx={{ 
+            mt: 5,
+            borderRadius: 2,
+            boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+          }}>
           {error}
         </Alert>
       </Container>
@@ -188,70 +192,179 @@ const Homepage = () => {
   }
 
   return (
-    <Container
-      maxWidth='lg'
-      sx={{ mt: 10, mb: 2 }}>
-      <Paper
-        elevation={0}
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
+      {/* Hero Section */}
+      <Box
         sx={{
-          p: { xs: 2, md: 2 },
-          mb: 4,
-        }}>
-        <Typography
-          variant={isMobile ? 'h4' : 'h3'}
-          component='h1'
-          gutterBottom
-          color='primary'
-          sx={{ fontWeight: 'bold' }}>
-          Welcome to CineEase
-        </Typography>
-      </Paper>
+          background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+          color: 'white',
+          py: { xs: 6, md: 8 },
+          mt: 8,
+          position: 'relative',
+          overflow: 'hidden',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.05"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")',
+            opacity: 0.1,
+          }
+        }}
+      >
+        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
+          <Box textAlign="center">
+            <Typography
+              variant={isMobile ? 'h3' : 'h2'}
+              component="h1"
+              gutterBottom
+              sx={{
+                fontWeight: 'bold',
+                mb: 2,
+                textShadow: '0 2px 4px rgba(0,0,0,0.3)',
+              }}
+            >
+              Welcome to FilmSathi
+            </Typography>
+            <Typography
+              variant={isMobile ? 'h6' : 'h5'}
+              sx={{
+                mb: 4,
+                opacity: 0.9,
+                maxWidth: '600px',
+                mx: 'auto',
+                textShadow: '0 1px 2px rgba(0,0,0,0.3)',
+              }}
+            >
+              Discover amazing movies and book your tickets with ease
+            </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, flexWrap: 'wrap' }}>
+              <Chip
+                icon={<Theaters />}
+                label={`${movies.length} Movies Available`}
+                sx={{
+                  bgcolor: 'rgba(255,255,255,0.2)',
+                  color: 'white',
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                }}
+              />
+              <Chip
+                icon={<TrendingUp />}
+                label="Now Showing"
+                sx={{
+                  bgcolor: 'rgba(255,255,255,0.2)',
+                  color: 'white',
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                }}
+              />
+            </Box>
+          </Box>
+        </Container>
+      </Box>
 
-      <Typography
-        variant='h4'
-        component='h2'
-        sx={{
-          mb: 3,
-          pl: 2,
-          borderLeft: `4px solid ${theme.palette.primary.main}`,
-          fontWeight: 'bold',
-        }}>
-        Now Showing
-      </Typography>
+      {/* Movies Section */}
+      <Container maxWidth="lg" sx={{ py: 6 }}>
+        {/* Section Header */}
+        <Box sx={{ mb: 4 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+            <MovieFilter sx={{ mr: 2, color: 'primary.main', fontSize: 32 }} />
+            <Typography
+              variant="h4"
+              component="h2"
+              sx={{
+                fontWeight: 'bold',
+                color: 'text.primary',
+              }}
+            >
+              Now Showing
+            </Typography>
+          </Box>
+          <Typography
+            variant="body1"
+            color="text.secondary"
+            sx={{ mb: 3 }}
+          >
+            Book your favorite movies and enjoy the cinematic experience
+          </Typography>
+        </Box>
 
-      {loading ? (
-        <MovieSkeletons />
-      ) : (
-        <Grid
-          container
-          spacing={3}
-          sx={{ mb: 4 }}>
-          {movies.map((movie) => (
-            <Grid
-              item
-              xs={12}
-              sm={6}
-              md={4}
-              key={movie.id}>
-              <MovieCard movieInformation={movie} />
-            </Grid>
-          ))}
-        </Grid>
-      )}
+        {/* Movies Grid */}
+        {loading ? (
+          <Grid container spacing={3}>
+            {[...Array(limit)].map((_, index) => (
+              <Grid item xs={12} sm={6} md={4} key={index}>
+                <Card sx={{ height: 400 }}>
+                  <Skeleton variant="rectangular" height={250} />
+                  <CardContent>
+                    <Skeleton variant="text" height={32} />
+                    <Skeleton variant="text" height={24} width="60%" />
+                    <Skeleton variant="text" height={20} width="40%" sx={{ mt: 1 }} />
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        ) : movies.length === 0 ? (
+          <Card
+            sx={{
+              p: 6,
+              textAlign: 'center',
+              background: `linear-gradient(145deg, ${theme.palette.background.paper} 0%, ${theme.palette.background.default} 100%)`,
+              border: `1px solid ${theme.palette.divider}`,
+              borderRadius: 3,
+            }}
+          >
+            <MovieFilter sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
+            <Typography variant="h5" gutterBottom color="text.primary" fontWeight="600">
+              No Movies Available
+            </Typography>
+            <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+              There are currently no movies to display. Please check back later or contact the administrator.
+            </Typography>
+            <Button
+              variant="outlined"
+              color="primary"
+              onClick={() => window.location.reload()}
+              sx={{ borderRadius: 2 }}
+            >
+              Refresh Page
+            </Button>
+          </Card>
+        ) : (
+          <Grid container spacing={3}>
+            {movies.map((movie) => (
+              <Grid item xs={12} sm={6} md={4} key={movie.id}>
+                <MovieCard movieInformation={movie} />
+              </Grid>
+            ))}
+          </Grid>
+        )}
+      </Container>
 
+      {/* Snackbar for errors */}
       <Snackbar
         open={showError}
         autoHideDuration={6000}
         onClose={handleCloseError}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
         <Alert
           onClose={handleCloseError}
-          severity='error'
-          sx={{ width: '100%' }}>
+          severity="error"
+          sx={{
+            width: '100%',
+            borderRadius: 2,
+            boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+          }}
+        >
           {error}
         </Alert>
       </Snackbar>
-    </Container>
+    </Box>
   );
 };
 

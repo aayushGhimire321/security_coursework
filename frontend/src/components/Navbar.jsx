@@ -97,7 +97,10 @@ const Navbar = () => {
               <ListItemText
                 primary={item.label}
                 sx={{
-                  color: isActive(item.path) ? 'primary.main' : 'text.primary',
+                  '& .MuiTypography-root': {
+                    color: isActive(item.path) ? '#1976d2' : '#333333',
+                    fontWeight: 500
+                  }
                 }}
               />
             </ListItem>
@@ -112,9 +115,10 @@ const Navbar = () => {
       position='fixed'
       sx={{
         bgcolor: 'background.paper',
-        backgroundImage: 'linear-gradient(to right, #f8f9fa, #e9ecef)',
         color: 'text.primary',
         boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+        borderBottom: 1,
+        borderColor: 'divider',
       }}>
       <Container maxWidth='xl'>
         <Toolbar disableGutters>
@@ -127,9 +131,7 @@ const Navbar = () => {
               fontWeight: 700,
               fontSize: { xs: '1.5rem', md: '1.75rem' },
               textDecoration: 'none',
-              background: 'linear-gradient(45deg, #007bff, #00ff00)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
+              color: '#1976d2',
               flexGrow: { xs: 1, md: 0 },
             }}>
             FilmSathi 
@@ -155,12 +157,12 @@ const Navbar = () => {
                     sx={{
                       mx: 1,
                       color: isActive(item.path)
-                        ? 'primary.main'
-                        : 'text.primary',
+                        ? '#1976d2'
+                        : '#333333',
                       fontSize: '1rem',
-                      fontWeight: isActive(item.path) ? 700 : 400,
+                      fontWeight: isActive(item.path) ? 700 : 500,
                       '&:hover': {
-                        color: 'primary.main',
+                        color: '#1976d2',
                         backgroundColor: 'transparent',
                       },
                     }}>
@@ -178,6 +180,12 @@ const Navbar = () => {
                         textTransform: 'none',
                         minWidth: 150,
                         borderRadius: '20px',
+                        color: '#333333',
+                        borderColor: '#333333',
+                        '&:hover': {
+                          borderColor: '#1976d2',
+                          color: '#1976d2',
+                        }
                       }}
                       variant='outlined'>
                       Welcome, {user.username}!
@@ -202,7 +210,7 @@ const Navbar = () => {
                       </MenuItem>
                       <MenuItem
                         onClick={handleLogout}
-                        sx={{ color: 'error.main' }}>
+                        sx={{ color: '#d32f2f' }}>
                         Logout
                       </MenuItem>
                     </Menu>
@@ -215,6 +223,12 @@ const Navbar = () => {
                       variant='outlined'
                       sx={{
                         borderRadius: '20px',
+                        color: '#333333',
+                        borderColor: '#333333',
+                        '&:hover': {
+                          borderColor: '#1976d2',
+                          color: '#1976d2',
+                        }
                       }}>
                       Login
                     </Button>
@@ -224,6 +238,10 @@ const Navbar = () => {
                       variant='contained'
                       sx={{
                         borderRadius: '20px',
+                        backgroundColor: '#1976d2',
+                        '&:hover': {
+                          backgroundColor: '#115293',
+                        }
                       }}>
                       Register
                     </Button>
