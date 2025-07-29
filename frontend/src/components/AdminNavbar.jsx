@@ -39,7 +39,7 @@ const menuItems = [
   {
     text: 'Bookings Management',
     icon: <ConfirmationNumber />,
-    path: '/admin/bookingsManagement',
+    path: '/admin/bookingManagement',
   },
   {
     text: 'Customers Management',

@@ -20,28 +20,39 @@ import { getAllBookingsApi } from '../../../apis/Api';
 const BookingManagement = () => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
-    getAllBookingsApi()
-      .then((res) => {
+    const fetchBookings = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        console.log('Fetching bookings...');
+        const res = await getAllBookingsApi();
+        console.log('Bookings response:', res.data);
         setBookings(res.data?.bookings || []);
-        setLoading(false);
-      })
-      .catch((error) => {
-        // console.log(error);
+      } catch (error) {
+        console.error('Error fetching bookings:', error);
+        setError('Failed to fetch bookings. Please try again later.');
         toast.error('Failed to fetch bookings. Please try again later.');
+      } finally {
         setLoading(false);
-      });
+      }
+    };
+
+    fetchBookings();
   }, []);
 
-  const filteredBookings = bookings.filter(
-    (booking) =>
-      booking.user?.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      booking.show?.movieId?.movieName
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase())
-  );
+  const filteredBookings = bookings.filter((booking) => {
+    if (!searchTerm) return true;
+    
+    const searchLower = searchTerm.toLowerCase();
+    const userName = booking.user?.username?.toLowerCase() || '';
+    const movieName = booking.show?.movieId?.movieName?.toLowerCase() || '';
+    
+    return userName.includes(searchLower) || movieName.includes(searchLower);
+  });
 
   return (
     <Container
@@ -71,7 +82,10 @@ const BookingManagement = () => {
         {loading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
             <CircularProgress />
+            <Typography variant='body1' sx={{ ml: 2 }}>Loading bookings...</Typography>
           </Box>
+        ) : error ? (
+          <Alert severity='error'>{error}</Alert>
         ) : filteredBookings.length === 0 ? (
           <Alert severity='info'>No Bookings Available</Alert>
         ) : (

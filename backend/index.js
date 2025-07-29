@@ -86,11 +86,12 @@ app.use(cookieParser()); // Enable cookie parsing
 // Enable file upload
 app.use(
   accessFormData({
-    limits: { fileSize: 5 * 1024 * 1024 }, // Limit file size to 2MB
+    limits: { fileSize: 5 * 1024 * 1024 }, // Limit file size to 5MB
     abortOnLimit: true, // Abort upload if file exceeds size limit
     safeFileNames: true, // Sanitize filenames automatically
     preserveExtension: true, // Preserve file extensions
-    allowedTypes: ['image/jpeg', 'image/png'],
+    debug: true, // Enable debug logging
+    createParentPath: true, // Create parent directories if they don't exist
   })
 );
 

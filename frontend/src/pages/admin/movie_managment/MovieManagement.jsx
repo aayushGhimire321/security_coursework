@@ -192,7 +192,7 @@ const MovieManagement = () => {
                       gap={1}>
                       <Button
                         component={Link}
-                        to={`/admin/update/${movie._id}`}
+                        to={`/admin/movies/update/${movie._id}`}
                         variant='outlined'
                         size='small'>
                         Edit
