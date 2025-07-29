@@ -51,7 +51,7 @@ const menuItems = [
   {
     text: 'Log Management',
     icon: <LocalActivity />,
-    path: '/admin/activityLogs',
+    path: '/admin/logManagement',
   },
 ];
 
