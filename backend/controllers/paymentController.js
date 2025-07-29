@@ -23,9 +23,9 @@
 // };
 
 const axios = require('axios');
-const Payment = require('../models/paymentModel').default;
+const Payment = require('../models/paymentModel');
 const PurchasedItem = require('../models/purchasedItemsModel');
-const Booking = require('../models/bookingModel').default;
+const Booking = require('../models/bookingModel');
 
 // Function to verify Khalti Payment
 const verifyKhaltiPayment = async (pidx) => {
@@ -38,7 +38,7 @@ const verifyKhaltiPayment = async (pidx) => {
   const bodyContent = JSON.stringify({ pidx });
 
   const reqOptions = {
-    url: `${process.env.KHALTI_GATEWAY_URL}/api/v2/epayment/lookup/`,
+    url: `${process.env.KHALTI_GATEWAY_URL}/epayment/lookup/`,
     method: 'POST',
     headers: headersList,
     data: bodyContent,
@@ -72,7 +72,7 @@ const initializeKhaltiPayment = async (details) => {
   });
 
   const reqOptions = {
-    url: `${process.env.KHALTI_GATEWAY_URL}/api/v2/epayment/initiate/`,
+    url: `${process.env.KHALTI_GATEWAY_URL}/epayment/initiate/`,
     method: 'POST',
     headers: headersList,
     data: bodyContent,

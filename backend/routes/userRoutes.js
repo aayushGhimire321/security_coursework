@@ -7,26 +7,26 @@ const {
   publicGuard,
 } = require('../middleware/authGuard');
 
-const rateLimit = require('express-rate-limit');
+// const rateLimit = require('express-rate-limit');
 
-const loginLimiter = rateLimit({
-  windowMs: 10 * 60 * 1000, // 10 minutes
-  max: 5, // Limit to 5 requests per IP per 10 minutes
-  message: 'Too many login attempts, please try again later.',
-  // send a response to the client
-  handler: (req, res, next) => {
-    res.status(429).json({
-      status: 'fail',
-      message: 'Too many login attempts, please try again later.',
-    });
-  },
-});
+// const loginLimiter = rateLimit({
+//   windowMs: 10 * 60 * 1000, // 10 minutes
+//   max: 5, // Limit to 5 requests per IP per 10 minutes
+//   message: 'Too many login attempts, please try again later.',
+//   // send a response to the client
+//   handler: (req, res, next) => {
+//     res.status(429).json({
+//       status: 'fail',
+//       message: 'Too many login attempts, please try again later.',
+//     });
+//   },
+// });
 
 // Creating user registration route
 router.post('/create', publicGuard, userController.createUser);
 
 // Creating login route
-router.post('/login', publicGuard, loginLimiter, userController.loginUser);
+router.post('/login', publicGuard, userController.loginUser);
 
 // Creating user forgot password route
 router.post('/forgot-password', publicGuard, userController.forgotPassword);

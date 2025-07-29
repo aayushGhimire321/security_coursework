@@ -6,7 +6,7 @@ const https = require('https');
 const cors = require('cors');
 const fs = require('fs');
 const accessFormData = require('express-fileupload');
-const rateLimit = require('express-rate-limit');
+// const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
 const mongoSanitize = require('express-mongo-sanitize');
@@ -44,20 +44,20 @@ app.use(cors(corsOptions));
 // Express JSON Config
 app.use(express.json());
 
-// Define a rate limit
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per window
-  message: {
-    status: 'fail',
-    message:
-      'Too many requests from this IP, please try again after 15 minutes.',
-  },
-  headers: true, // Include rate limit info in headers
-});
+// Define a rate limit (COMMENTED OUT)
+// const limiter = rateLimit({
+//   windowMs: 15 * 60 * 1000, // 15 minutes
+//   max: 100, // Limit each IP to 100 requests per window
+//   message: {
+//     status: 'fail',
+//     message:
+//       'Too many requests from this IP, please try again after 15 minutes.',
+//   },
+//   headers: true, // Include rate limit info in headers
+// });
 
-// Apply the rate limit to all routes
-app.use(limiter);
+// Apply the rate limit to all routes (COMMENTED OUT)
+// app.use(limiter);
 
 // Middleware to set security headers for clickjacking protection
 app.use((req, res, next) => {
