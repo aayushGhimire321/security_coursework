@@ -104,7 +104,7 @@ const createMovie = async (req, res) => {
     ).catch(logErr => console.error('Failed to log error:', logErr));
 
     res.status(500).json({
-      'succ  ess': false,
+      success: false,
       message: 'Internal Server Error',
       error: error,
     });
@@ -178,7 +178,33 @@ const deleteMovie = async (req, res) => {
 // Update movie
 const updateMovie = async (req, res) => {
   try {
+    console.log('Update movie request received');
+    console.log('Movie ID:', req.params.id);
+    console.log('Request body:', req.body);
+    console.log('Files:', req.files);
+
+    const movieId = req.params.id;
+    
+    // Validate movie ID
+    if (!movieId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Movie ID is required',
+      });
+    }
+
+    // Check if movie exists
+    const existingMovie = await movieModel.findById(movieId);
+    if (!existingMovie) {
+      return res.status(404).json({
+        success: false,
+        message: 'Movie not found',
+      });
+    }
+
+    // Handle image update if provided
     if (req.files && req.files.moviePosterImage) {
+      console.log('Processing new image upload...');
       const { moviePosterImage } = req.files;
 
       // Upload image to /public/movies folder
@@ -187,39 +213,90 @@ const updateMovie = async (req, res) => {
         __dirname,
         `../public/movies/${imageName}`
       );
-      await moviePosterImage.mv(imageUploadPath);
+      
+      try {
+        await moviePosterImage.mv(imageUploadPath);
+        console.log('New image uploaded:', imageName);
+        
+        // Add new field to req.body
+        req.body.moviePosterImage = imageName;
 
-      // Add new field to req.body
-      req.body.moviePosterImage = imageName;
-
-      // If image is uploaded and req.body is assigned
-      if (req.body.moviePosterImage) {
-        const existingMovie = await movieModel.findById(req.params.id);
-        const oldImagePath = path.join(
-          __dirname,
-          `../public/movies/${existingMovie.moviePosterImage}`
-        );
-        fs.unlinkSync(oldImagePath);
+        // Delete old image if new image is uploaded successfully
+        if (existingMovie.moviePosterImage) {
+          const oldImagePath = path.join(
+            __dirname,
+            `../public/movies/${existingMovie.moviePosterImage}`
+          );
+          
+          try {
+            if (fs.existsSync(oldImagePath)) {
+              fs.unlinkSync(oldImagePath);
+              console.log('Old image deleted:', existingMovie.moviePosterImage);
+            }
+          } catch (imageDeleteError) {
+            console.warn('Failed to delete old image:', imageDeleteError.message);
+          }
+        }
+      } catch (uploadError) {
+        console.error('Image upload failed:', uploadError);
+        return res.status(500).json({
+          success: false,
+          message: 'Failed to upload new image',
+          error: uploadError.message,
+        });
       }
     }
 
-    //update the data
+    console.log('Updating movie with data:', req.body);
+
+    // Update the movie data
     const updatedMovie = await movieModel.findByIdAndUpdate(
-      req.params.id,
+      movieId,
       req.body,
-      { new: true }
+      { new: true, runValidators: true }
     );
+
+    if (!updatedMovie) {
+      return res.status(404).json({
+        success: false,
+        message: 'Failed to update movie',
+      });
+    }
+
+    console.log('Movie updated successfully:', updatedMovie._id);
+
+    // Log the activity
+    await logMovieActivity(
+      'info',
+      `Movie "${updatedMovie.movieName}" updated successfully`,
+      req.method,
+      req.originalUrl,
+      req.user?.id,
+      req.ip
+    );
+
     res.status(201).json({
       success: true,
       message: 'Movie updated successfully',
       movie: updatedMovie,
     });
   } catch (error) {
-    // console.log(error);
+    console.error('Update movie error:', error);
+    
+    // Log the error
+    await logMovieActivity(
+      'error',
+      `Failed to update movie: ${error.message}`,
+      req.method,
+      req.originalUrl,
+      req.user?.id,
+      req.ip
+    );
+
     res.status(500).json({
       success: false,
       message: 'Internal Server Error',
-      error: error,
+      error: error.message,
     });
   }
 };

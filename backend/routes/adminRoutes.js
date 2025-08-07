@@ -12,4 +12,7 @@ router.get('/dashboard_stats', adminGuard, getDashboardStats);
 // getAllLogs
 router.get('/get_all_logs', adminGuard, getAllLogs);
 
+// activityLogs (alias for getAllLogs)
+router.get('/activityLogs', adminGuard, getAllLogs);
+
 module.exports = router;
