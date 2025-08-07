@@ -75,6 +75,35 @@ const MovieManagement = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    console.log('Creating movie with data:', formData);
+    
+    // Validate required fields
+    if (!formData.movieName.trim()) {
+      toast.error('Movie name is required');
+      return;
+    }
+    if (!formData.movieGenre.trim()) {
+      toast.error('Movie genre is required');
+      return;
+    }
+    if (!formData.movieDetails.trim()) {
+      toast.error('Movie details are required');
+      return;
+    }
+    if (!formData.movieRated) {
+      toast.error('Movie rating is required');
+      return;
+    }
+    if (!formData.movieDuration) {
+      toast.error('Movie duration is required');
+      return;
+    }
+    if (!formData.moviePosterImage) {
+      toast.error('Movie poster image is required');
+      return;
+    }
+
     const formDataToSend = new FormData();
     Object.keys(formData).forEach((key) => {
       if (key !== 'previewPosterImage') {
@@ -82,19 +111,47 @@ const MovieManagement = () => {
       }
     });
 
+    // Log FormData contents for debugging
+    console.log('FormData being sent:');
+    for (let [key, value] of formDataToSend.entries()) {
+      console.log(key, value);
+    }
+
     createMovieApi(formDataToSend)
       .then((res) => {
+        console.log('Movie creation response:', res);
         if (res.status === 201) {
           toast.success(res.data.message);
           setOpenAddMovie(false);
+          // Reset form
+          setFormData({
+            movieName: '',
+            movieGenre: '',
+            movieDetails: '',
+            movieRated: '',
+            movieDuration: '',
+            moviePosterImage: null,
+            previewPosterImage: null,
+          });
           window.location.reload();
         }
       })
       .catch((error) => {
+        console.error('Movie creation error:', error);
+        console.error('Error response:', error.response);
+        
         if (error.response?.status === 400) {
-          toast.warning(error.response.data.message);
+          toast.warning(error.response.data.message || 'Invalid input data');
+        } else if (error.response?.status === 401) {
+          toast.error('Unauthorized. Please login again.');
+        } else if (error.response?.status === 403) {
+          toast.error('Access denied. Admin privileges required.');
+        } else if (error.response?.status === 500) {
+          toast.error(error.response.data.message || 'Server error occurred');
+        } else if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK') {
+          toast.error('Unable to connect to server. Please check if backend is running.');
         } else {
-          toast.error('Something went wrong!');
+          toast.error(error.response?.data?.message || error.message || 'Failed to create movie. Please try again.');
         }
       });
   };

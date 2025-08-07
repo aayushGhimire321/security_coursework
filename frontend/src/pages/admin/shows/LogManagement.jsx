@@ -193,7 +193,6 @@ const LogManagement = () => {
     console.log('✅ Dummy logs loaded successfully');
   };
 
-  // Load logs immediately when component mounts and when dependencies change
   useEffect(() => {
     fetchLogs();
   }, [page, limit, searchTerm, levelFilter]);

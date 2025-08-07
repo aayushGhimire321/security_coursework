@@ -1,14 +1,67 @@
 import axios from 'axios';
 
+// Auto-detect protocol and create fallback URLs
+const getBaseURL = () => {
+  const envURL = process.env.REACT_APP_API_URL;
+  if (envURL) return envURL;
+  
+  // Fallback: try HTTPS first, then HTTP
+  const protocol = window.location.protocol;
+  const hostname = window.location.hostname;
+  const port = '5000';
+  
+  return `${protocol}//${hostname}:${port}`;
+};
+
 // Create an Axios instance
 const Api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'https://localhost:5000', // Use environment variable for base URL
+  baseURL: getBaseURL(),
   withCredentials: true, // Include cookies in requests
   timeout: 10000, // 10 second timeout
 });
 
 // Log the API base URL for debugging
-console.log('API Base URL:', Api.defaults.baseURL);
+console.log('🔗 API Base URL:', Api.defaults.baseURL);
+
+// Enhanced connection test function with retry logic
+const testConnection = async (retries = 3) => {
+  for (let i = 0; i < retries; i++) {
+    try {
+      console.log(`🔄 Testing connection (attempt ${i + 1}/${retries})...`);
+      await Api.get('/health');
+      console.log('✅ Backend connection successful');
+      return true;
+    } catch (error) {
+      console.warn(`⚠️ Backend connection failed (attempt ${i + 1}):`, error.message);
+      
+      // Try HTTP fallback if HTTPS fails on first attempt
+      if (i === 0 && Api.defaults.baseURL.startsWith('https://')) {
+        const httpURL = Api.defaults.baseURL.replace('https://', 'http://');
+        Api.defaults.baseURL = httpURL;
+        console.log('🔄 Trying HTTP fallback:', httpURL);
+        continue;
+      }
+      
+      // Wait before retry (except on last attempt)
+      if (i < retries - 1) {
+        console.log('⏳ Waiting 2 seconds before retry...');
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
+    }
+  }
+  
+  console.error('❌ All connection attempts failed. Backend may not be running.');
+  return false;
+};
+
+// Test connection on startup
+let connectionStatus = false;
+testConnection().then(status => {
+  connectionStatus = status;
+});
+
+// Export connection status checker
+export const isBackendConnected = () => connectionStatus;
 
 Api.interceptors.request.use(
   async (config) => {
@@ -70,13 +123,19 @@ export const getSingleMovieApi = (id) =>
 export const deleteMovieApi = (id) =>
   Api.delete(`/api/movie/delete_movie/${id}`);
 export const updateMovieApi = (id, data) =>
-  Api.put(`/api/movie/update_movie/${id}`, data);
+  Api.put(`/api/movie/update_movie/${id}`, data, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
 export const pagination = (page, limit) =>
   Api.get(`/api/movie/pagination/?page=${page}&limit=${limit}`);
 export const getMovieCount = () => Api.get('/api/movie/get_movies_count');
 export const buyTicketsApi = (data) => Api.post(`/api/booking/create`, data);
 export const addShowsApi = (data) => Api.post('/api/shows/create', data);
 export const getAllShowsApi = () => Api.get('/api/shows/get_all');
+export const getSingleShowApi = (id) => Api.get(`/api/shows/get_by_id/${id}`);
+export const updateShowApi = (id, data) => Api.put(`/api/shows/${id}/update`, data);
 export const getShowByMovieIdApi = (id) =>
   Api.get(`/api/shows/get_by_movie/${id}`);
 export const getSeatsByShowIdApi = (id) =>
@@ -109,6 +168,10 @@ export const getDashboardStatsApi = () => Api.get('/api/admin/dashboard_stats');
 export const getAllLogsApi = (page, limit, searchTerm, levelFilter) =>
   Api.get(
     `/api/admin/get_all_logs?page=${page}&limit=${limit}&searchTerm=${searchTerm}&levelFilter=${levelFilter}`
+  );
+export const getActivityLogsApi = (page = 1, limit = 10, searchTerm = '', levelFilter = 'all') =>
+  Api.get(
+    `/api/admin/activityLogs?page=${page}&limit=${limit}&searchTerm=${searchTerm}&levelFilter=${levelFilter}`
   );
 
 // verify_register_otp

@@ -7,7 +7,7 @@ import {
   Typography,
 } from '@mui/material';
 import { useEffect, useState } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate, useLocation, Outlet } from 'react-router-dom';
 import { getSingleProfileApi } from '../apis/Api';
 import AdminNavbar from '../components/AdminNavbar';
 import Navbar from '../components/Navbar';
@@ -126,18 +126,13 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
     }
   }
 
-  return (
-    <Stack
-      direction='row'
-      sx={{ minHeight: '100vh' }}>
-      {user?.isAdmin ? <AdminNavbar /> : <Navbar />}
-      <Stack
-        component='main'
-        sx={{ flexGrow: 1, p: 3, width: '100%' }}>
-        {children}
-      </Stack>
-    </Stack>
-  );
+  // For admin routes with children prop (AdminLayout), render children directly
+  if (children) {
+    return children;
+  }
+
+  // For user routes with nested routes, render Outlet
+  return <Outlet />;
 };
 
 export default ProtectedRoute;

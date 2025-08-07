@@ -49,10 +49,17 @@ const ShowManagement = () => {
   };
 
   const filteredShows = shows.filter(
-    (show) =>
-      show.movieId.movieName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      show.showDate.includes(searchTerm) ||
-      show.showTime.includes(searchTerm)
+    (show) => {
+      // Check if movieId exists and has movieName before filtering
+      if (!show.movieId || !show.movieId.movieName) {
+        return false;
+      }
+      return (
+        show.movieId.movieName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        show.showDate.includes(searchTerm) ||
+        show.showTime.includes(searchTerm)
+      );
+    }
   );
 
   return (
@@ -106,23 +113,40 @@ const ShowManagement = () => {
                     key={show._id}
                     hover>
                     <TableCell>
-                      <Box
-                        component='img'
-                        src={`https://localhost:5000/movies/${show.movieId.moviePosterImage}`}
-                        alt={show.movieId.movieName}
-                        sx={{
-                          width: '50px',
-                          height: '75px',
-                          objectFit: 'cover',
-                          borderRadius: 1,
-                        }}
-                      />
+                      {show.movieId && show.movieId.moviePosterImage ? (
+                        <Box
+                          component='img'
+                          src={`https://localhost:5000/movies/${show.movieId.moviePosterImage}`}
+                          alt={show.movieId.movieName || 'Movie Poster'}
+                          sx={{
+                            width: '50px',
+                            height: '75px',
+                            objectFit: 'cover',
+                            borderRadius: 1,
+                          }}
+                        />
+                      ) : (
+                        <Box
+                          sx={{
+                            width: '50px',
+                            height: '75px',
+                            bgcolor: 'grey.300',
+                            borderRadius: 1,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '12px',
+                            color: 'grey.600'
+                          }}>
+                          No Image
+                        </Box>
+                      )}
                     </TableCell>
-                    <TableCell>{show.movieId.movieName}</TableCell>
-                    <TableCell>{show.movieId.movieDuration}</TableCell>
-                    <TableCell>{show.showDate}</TableCell>
-                    <TableCell>{show.showTime}</TableCell>
-                    <TableCell>Rs.{show.showPrice}</TableCell>
+                    <TableCell>{show.movieId?.movieName || 'Unknown Movie'}</TableCell>
+                    <TableCell>{show.movieId?.movieDuration || 'N/A'}</TableCell>
+                    <TableCell>{show.showDate || 'N/A'}</TableCell>
+                    <TableCell>{show.showTime || 'N/A'}</TableCell>
+                    <TableCell>Rs.{show.showPrice || '0'}</TableCell>
                     <TableCell>
                       <Button
                         component={Link}

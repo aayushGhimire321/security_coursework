@@ -20,27 +20,41 @@ import { getAllBookingsApi } from '../../../apis/Api';
 const BookingManagement = () => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
+    console.log('📋 Loading booking management...');
+    setLoading(true);
+    setError(null);
+    
     getAllBookingsApi()
       .then((res) => {
-        setBookings(res.data?.bookings || []);
+        console.log('✅ Bookings API Response:', res.data);
+        const bookingsData = res.data?.bookings || [];
+        console.log('📊 Number of bookings:', bookingsData.length);
+        setBookings(bookingsData);
         setLoading(false);
       })
       .catch((error) => {
-        // console.log(error);
+        console.error('❌ Error loading bookings:', error);
+        console.error('Full error:', error.response?.data || error.message);
+        setError(error.response?.data?.message || error.message || 'Failed to fetch bookings');
         toast.error('Failed to fetch bookings. Please try again later.');
         setLoading(false);
       });
   }, []);
 
   const filteredBookings = bookings.filter(
-    (booking) =>
-      booking.user?.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      booking.show?.movieId?.movieName
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase())
+    (booking) => {
+      if (!booking) return false;
+      
+      const userName = booking.user?.username?.toLowerCase() || '';
+      const movieName = booking.show?.movieId?.movieName?.toLowerCase() || '';
+      const searchLower = searchTerm.toLowerCase();
+      
+      return userName.includes(searchLower) || movieName.includes(searchLower);
+    }
   );
 
   return (
@@ -54,6 +68,18 @@ const BookingManagement = () => {
         gutterBottom>
         Booking Management
       </Typography>
+      
+      {error && (
+        <Alert severity="error" sx={{ mb: 3 }}>
+          <Typography variant="h6" gutterBottom>
+            Error Loading Bookings
+          </Typography>
+          <Typography variant="body2">
+            {error}
+          </Typography>
+        </Alert>
+      )}
+      
       <Paper
         elevation={1}
         sx={{ p: 3 }}>

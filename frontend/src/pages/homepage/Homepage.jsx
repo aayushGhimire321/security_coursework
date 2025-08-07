@@ -61,7 +61,7 @@ const Homepage = () => {
       setShowError(false);
 
       console.log('Fetching movie count...');
-      console.log('API Base URL:', process.env.REACT_APP_API_URL || 'https://localhost:5000');
+      console.log('API Base URL:', process.env.REACT_APP_API_URL || 'http://localhost:5000');
       
       const countRes = await getMovieCount();
       console.log('Movie count response:', countRes);
@@ -100,7 +100,7 @@ const Homepage = () => {
       let errorMessage = 'An error occurred while fetching data';
       
       if (err.code === 'ECONNREFUSED' || err.code === 'ERR_NETWORK') {
-        errorMessage = 'Unable to connect to the server. Please check if the backend is running on https://localhost:5000';
+        errorMessage = 'Unable to connect to the server. Please check if the backend is running on http://localhost:5000';
       } else if (err.response?.status === 404) {
         errorMessage = 'API endpoint not found. Please check the server configuration.';
       } else if (err.response?.status === 500) {

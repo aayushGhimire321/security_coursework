@@ -1,9 +1,11 @@
 import {
+  Alert,
   Box,
   Button,
   Card,
   CardContent,
   CardHeader,
+  CircularProgress,
   Container,
   Grid,
   List,
@@ -33,17 +35,54 @@ const StyledTicketNumber = styled(Box)(({ theme }) => ({
 
 const Tickets = () => {
   const [tickets, setTickets] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
+    console.log('🎫 Fetching user tickets...');
+    
+    // Check if user is logged in
+    const token = localStorage.getItem('token');
+    console.log('🔑 User token exists:', !!token);
+    
+    if (!token) {
+      setError('Please log in to view your tickets');
+      setLoading(false);
+      return;
+    }
+    
+    setLoading(true);
+    setError(null);
+    
     getBookingsByUserApi()
       .then((res) => {
-        const sortedTickets = res.data.tickets.sort(
+        console.log('✅ Tickets API Response:', res.data);
+        
+        // Check if tickets exist in the response
+        const ticketsData = res.data.tickets || res.data.bookings || [];
+        console.log('📋 Tickets data:', ticketsData);
+        console.log('📊 Number of tickets:', ticketsData.length);
+        
+        const sortedTickets = ticketsData.sort(
           (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
         );
         setTickets(sortedTickets);
+        setLoading(false);
       })
       .catch((error) => {
-        // console.log(error);
+        console.error('❌ Error fetching tickets:', error);
+        console.error('Full error:', error.response?.data || error.message);
+        
+        // More specific error messages
+        if (error.response?.status === 401) {
+          setError('Please log in to view your tickets');
+          localStorage.removeItem('token'); // Clear invalid token
+        } else if (error.response?.status === 404) {
+          setError('No tickets found for your account');
+        } else {
+          setError(error.response?.data?.message || error.message || 'Failed to fetch tickets');
+        }
+        setLoading(false);
       });
   }, []);
 
@@ -121,8 +160,35 @@ const Tickets = () => {
           gutterBottom>
           My Tickets
         </Typography>
-        {tickets.length === 0 ? (
-          <Typography variant='body1'>No tickets available</Typography>
+        
+        {loading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+            <CircularProgress />
+            <Typography variant="body1" sx={{ ml: 2 }}>
+              Loading your tickets...
+            </Typography>
+          </Box>
+        ) : error ? (
+          <Alert severity="error" sx={{ mb: 3 }}>
+            <Typography variant="h6" gutterBottom>
+              Error Loading Tickets
+            </Typography>
+            <Typography variant="body2">
+              {error}
+            </Typography>
+            <Typography variant="body2" sx={{ mt: 1 }}>
+              Please make sure you're logged in and try refreshing the page.
+            </Typography>
+          </Alert>
+        ) : tickets.length === 0 ? (
+          <Alert severity="info" sx={{ mb: 3 }}>
+            <Typography variant="h6" gutterBottom>
+              No Tickets Found
+            </Typography>
+            <Typography variant="body2">
+              You haven't purchased any tickets yet. Start by browsing movies and booking your first show!
+            </Typography>
+          </Alert>
         ) : (
           Object.entries(groupedTickets).map(([date, dateTickets]) => (
             <Box

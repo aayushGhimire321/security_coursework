@@ -1,10 +1,12 @@
 /* eslint-disable no-unused-vars */
 import { PhotoCamera } from '@mui/icons-material';
 import {
+  Alert,
   Avatar,
   Box,
   Button,
   CardContent,
+  CircularProgress,
   Container,
   FormControlLabel,
   Grid,
@@ -45,24 +47,53 @@ const Profile = () => {
 
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
+    console.log('👤 Loading user profile...');
+    
+    // Check if user is logged in
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.error('❌ No authentication token found');
+      setError('Please log in to view your profile');
+      setLoading(false);
+      navigate('/login');
+      return;
+    }
+
     getSingleProfileApi()
       .then((res) => {
+        console.log('✅ Profile API Response:', res.data);
         const userData = res.data.user;
+        
+        if (!userData) {
+          throw new Error('No user data received');
+        }
+        
         setFormData((prev) => ({
           ...prev,
           ...userData,
         }));
         setUser(userData);
         setLoading(false);
+        console.log('✅ Profile loaded successfully:', userData.username);
       })
       .catch((error) => {
-        console.error(error);
+        console.error('❌ Profile loading error:', error);
+        console.error('Full error:', error.response?.data || error.message);
+        
+        if (error.response?.status === 401) {
+          setError('Session expired. Please log in again.');
+          localStorage.removeItem('token');
+          setTimeout(() => navigate('/login'), 2000);
+        } else {
+          setError(error.response?.data?.message || error.message || 'Failed to load profile');
+        }
         toast.error('Failed to load profile');
         setLoading(false);
       });
-  }, []);
+  }, [navigate]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -133,15 +164,58 @@ const Profile = () => {
 
   if (loading) {
     return (
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: '100vh',
-        }}>
-        <Typography>Loading...</Typography>
-      </Box>
+      <Container maxWidth="md" sx={{ py: 4 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            minHeight: '50vh',
+            gap: 2
+          }}>
+          <CircularProgress size={50} />
+          <Typography variant="h6" color="text.secondary">
+            Loading your profile...
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Please wait while we fetch your information
+          </Typography>
+        </Box>
+      </Container>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container maxWidth="md" sx={{ py: 4 }}>
+        <Alert severity="error" sx={{ mb: 3 }}>
+          <Typography variant="h6" gutterBottom>
+            Profile Loading Error
+          </Typography>
+          <Typography variant="body2">
+            {error}
+          </Typography>
+          <Typography variant="body2" sx={{ mt: 2 }}>
+            Please try refreshing the page or log in again.
+          </Typography>
+        </Alert>
+        <Box sx={{ textAlign: 'center', mt: 3 }}>
+          <Button 
+            variant="contained" 
+            onClick={() => window.location.reload()}
+            sx={{ mr: 2 }}
+          >
+            Refresh Page
+          </Button>
+          <Button 
+            variant="outlined" 
+            onClick={() => navigate('/login')}
+          >
+            Login Again
+          </Button>
+        </Box>
+      </Container>
     );
   }
 

@@ -70,6 +70,11 @@ const UpdateMovie = () => {
     e.preventDefault();
     setLoading(true);
 
+    console.log('Starting movie update process...');
+    console.log('Movie ID:', id);
+    console.log('Form data:', formData);
+    console.log('New image:', moviePosterNewImage);
+
     const formDataToSend = new FormData();
     Object.entries(formData).forEach(([key, value]) => {
       formDataToSend.append(key, value);
@@ -77,16 +82,42 @@ const UpdateMovie = () => {
 
     if (moviePosterNewImage) {
       formDataToSend.append('moviePosterImage', moviePosterNewImage);
+      console.log('Image added to form data');
+    }
+
+    // Log FormData contents
+    console.log('FormData contents:');
+    for (let [key, value] of formDataToSend.entries()) {
+      console.log(key, value);
     }
 
     try {
+      console.log('Sending update request...');
       const res = await updateMovieApi(id, formDataToSend);
+      console.log('Update response:', res);
+      
       if (res.status === 201) {
         toast.success(res.data.message);
+        console.log('Movie updated successfully');
       }
     } catch (error) {
-      if (error.response?.status === 500 || error.response?.status === 400) {
-        toast.error(error.response.data.message);
+      console.error('Update error details:', {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+        config: error.config
+      });
+      
+      if (error.response?.status === 500) {
+        toast.error(error.response.data.message || 'Internal server error occurred');
+      } else if (error.response?.status === 400) {
+        toast.error(error.response.data.message || 'Invalid request data');
+      } else if (error.response?.status === 401) {
+        toast.error('Unauthorized. Please login again.');
+      } else if (error.response?.status === 403) {
+        toast.error('Access denied. Admin privileges required.');
+      } else {
+        toast.error('Failed to update movie. Please try again.');
       }
     } finally {
       setLoading(false);
