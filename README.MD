@@ -641,9 +641,9 @@ FilmSathi/
 For any queries, contributions, or security concerns, please contact:
 
 **Aayush Ghimire**  
-📧 [aghimire781@gmail.com](mailto:aghimire781@gmail.com)  
+📧 [aghimire491@gmail.com](mailto:aghimire491@gmail.com)  
 📍 Kathmandu, Nepal  
-🔗 [GitHub Profile](https://github.com/aayushGhimire321)
+🔗 [GitHub Profile](https://github.com/aayushghimire321)
 
 ---
 
